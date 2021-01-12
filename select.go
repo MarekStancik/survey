@@ -22,6 +22,8 @@ type Select struct {
 	Renderer
 	Message       string
 	Options       []string
+	OptChan       chan []string
+	ErrChan       chan error
 	Default       interface{}
 	Help          string
 	PageSize      int
@@ -258,20 +260,52 @@ func (s *Select) Prompt(config *PromptConfig) (interface{}, error) {
 	cursor.Hide()       // hide the cursor
 	defer cursor.Show() // show the cursor when we're done
 
-	// start waiting for input
+	interruptChan := make(chan struct{})
+	runeChan := make(chan rune)
+	closeReader := make(chan bool)
+	// Read Input
+	go func() {
+		for {
+			select {
+			case <-closeReader:
+				return
+			default:
+				r, _, err := rr.ReadRune()
+				if err != nil {
+					s.ErrChan <- err
+					return
+				}
+				if r == terminal.KeyInterrupt {
+					interruptChan <- struct{}{}
+					return
+				}
+				runeChan <- r
+				if <-closeReader {
+					return
+				}
+			}
+		}
+	}()
+L:
 	for {
-		r, _, err := rr.ReadRune()
-		if err != nil {
-			return "", err
-		}
-		if r == terminal.KeyInterrupt {
+		select {
+		case s.Options = <-s.OptChan:
+			if len(s.Options) == 0 {
+				s.Options = []string{"No results..."}
+			}
+			s.OnChange(terminal.KeyArrowRight, config)
+		case e := <-s.ErrChan:
+			if e != nil {
+				return "", e
+			}
+		case <-interruptChan:
 			return "", terminal.InterruptErr
-		}
-		if r == terminal.KeyEndTransmission {
-			break
-		}
-		if s.OnChange(r, config) {
-			break
+		case r := <-runeChan:
+			close := r == terminal.KeyEndTransmission || s.OnChange(r, config)
+			closeReader <- close
+			if close {
+				break L
+			}
 		}
 	}
 	options := s.filterOptions(config)
