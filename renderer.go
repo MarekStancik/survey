@@ -3,6 +3,7 @@ package survey
 import (
 	"bytes"
 	"fmt"
+	"regexp"
 	"unicode/utf8"
 
 	"github.com/AlecAivazis/survey/v2/core"
@@ -148,7 +149,7 @@ func (r *Renderer) countLines(buf bytes.Buffer) int {
 			delim = len(bufBytes) // no new line found, read rest of text
 		}
 
-		if lineWidth := utf8.RuneCount(bufBytes[curr:delim]); lineWidth > w {
+		if lineWidth := utf8.RuneCount(stripAnsi(bufBytes[curr:delim])); lineWidth > w {
 			// account for word wrapping
 			count += lineWidth / w
 			if (lineWidth % w) == 0 {
@@ -161,4 +162,13 @@ func (r *Renderer) countLines(buf bytes.Buffer) int {
 	}
 
 	return count
+}
+
+// Thanks to https://github.com/acarl005/stripansi/blob/master/stripansi.go
+const ansi = "[\u001B\u009B][[\\]()#;?]*(?:(?:(?:[a-zA-Z\\d]*(?:;[a-zA-Z\\d]*)*)?\u0007)|(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PRZcf-ntqry=><~]))"
+
+var re = regexp.MustCompile(ansi)
+
+func stripAnsi(b []byte) []byte {
+	return re.ReplaceAll(b, []byte{})
 }
