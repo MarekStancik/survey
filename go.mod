@@ -1,6 +1,4 @@
-module github.com/AlecAivazis/survey/v2
-
-replace github.com/AlecAivazis/survey/v2 => github.com/MarekStancik/survey/v2 v2.2.7
+module github.com/MarekStancik/survey/v2
 
 require (
 	github.com/Netflix/go-expect v0.0.0-20180615182759-c93bf25de8e8
