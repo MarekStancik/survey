@@ -1,5 +1,7 @@
 module github.com/AlecAivazis/survey/v2
 
+replace github.com/AlecAivazis/survey/v2 => github.com/MarekStancik/survey/v2 v2.2.7
+
 require (
 	github.com/Netflix/go-expect v0.0.0-20180615182759-c93bf25de8e8
 	github.com/davecgh/go-spew v1.1.1 // indirect
@@ -17,5 +19,3 @@ require (
 )
 
 go 1.13
-
-replace github.com/AlecAivazis/survey/v2 => github.com/MarekStancik/survey v1.8.8
