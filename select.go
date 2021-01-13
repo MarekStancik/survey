@@ -53,7 +53,7 @@ var SelectQuestionTemplate = `
 {{- color "default+hb"}}{{ .Message }}{{ .FilterMessage }}{{color "reset"}}
 {{- if .ShowAnswer}}{{color "cyan"}} {{.Answer}}{{color "reset"}}{{"\n"}}
 {{- else}}
-  {{- "  "}}{{- color "cyan"}}[Use arrows to move, type to filter{{- if and .Help (not .ShowHelp)}}, {{ .Config.HelpInput }} for more help{{end}}]{{color "reset"}}
+  {{- "  "}}{{- color "cyan"}}[Use arrows ← → ↑ ↓ to move, type to filter{{- if and .Help (not .ShowHelp)}}, {{ .Config.HelpInput }} for more help{{end}}]{{color "reset"}}
   {{- "\n"}}
   {{- range $ix, $choice := .PageEntries}}
     {{- if eq $ix $.SelectedIndex }}{{color $.Config.Icons.SelectFocus.Format }}{{ $.Config.Icons.SelectFocus.Text }} {{else}}{{color "default"}}  {{end}}
@@ -91,7 +91,6 @@ func (s *Select) OnChange(key rune, config *PromptConfig) bool {
 			// otherwise we are not at the top of the list so decrement the selected index
 			s.selectedIndex--
 		}
-
 		// if the user pressed down or 'j' to emulate vim
 	} else if (key == terminal.KeyTab || key == terminal.KeyArrowDown || (s.VimMode && key == 'j')) && len(options) > 0 {
 		s.useDefault = false
@@ -104,6 +103,32 @@ func (s *Select) OnChange(key rune, config *PromptConfig) bool {
 			s.selectedIndex++
 		}
 		// only show the help message if we have one
+	} else if key == terminal.KeyArrowRight && len(options) > 0 {
+		// next page
+		len := len(options)
+		sum := s.selectedIndex + s.PageSize
+		if sum >= len {
+			if sum-(len-1) < s.PageSize {
+				s.selectedIndex = len - 1
+			} else {
+				s.selectedIndex = 0
+			}
+		} else {
+			s.selectedIndex = sum
+		}
+	} else if key == terminal.KeyArrowLeft && len(options) > 0 {
+		//prev page
+		len := len(options)
+		sum := s.selectedIndex - s.PageSize
+		if sum < 0 {
+			if -sum < s.PageSize {
+				s.selectedIndex = 0
+			} else {
+				s.selectedIndex = len - 1
+			}
+		} else {
+			s.selectedIndex = sum
+		}
 	} else if string(key) == config.HelpInput && s.Help != "" {
 		s.showingHelp = true
 		// if the user wants to toggle vim mode on/off
@@ -293,7 +318,7 @@ L:
 			if len(s.Options) == 0 {
 				s.Options = []string{"No results..."}
 			}
-			s.OnChange(terminal.KeyArrowRight, config)
+			s.OnChange(terminal.SpecialKeyHome, config)
 		case e := <-s.ErrChan:
 			if e != nil {
 				return "", e
