@@ -17,3 +17,5 @@ require (
 )
 
 go 1.13
+
+replace github.com/AlecAivazis/survey/v2 => github.com/MarekStancik/survey/v2 v2.3.4
