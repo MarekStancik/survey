@@ -2,6 +2,7 @@ package survey
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/AlecAivazis/survey/v2/core"
 	"github.com/AlecAivazis/survey/v2/terminal"
@@ -287,27 +288,19 @@ func (s *Select) Prompt(config *PromptConfig) (interface{}, error) {
 
 	interruptChan := make(chan struct{})
 	runeChan := make(chan rune)
-	closeReader := make(chan bool)
+	read := make(chan bool, 1)
+	read <- true
+	defer func() { read <- false }()
 	// Read Input
 	go func() {
-		for {
-			select {
-			case <-closeReader:
-				return
-			default:
-				r, _, err := rr.ReadRune()
-				if err != nil {
-					s.ErrChan <- err
-					return
-				}
-				if r == terminal.KeyInterrupt {
-					interruptChan <- struct{}{}
-					return
-				}
+		for <-read {
+			r, _, err := rr.ReadRune()
+			if err != nil {
+				s.ErrChan <- err
+			} else if r == terminal.KeyInterrupt {
+				interruptChan <- struct{}{}
+			} else {
 				runeChan <- r
-				if <-closeReader {
-					return
-				}
 			}
 		}
 	}()
@@ -320,17 +313,16 @@ L:
 			}
 			s.OnChange(terminal.SpecialKeyHome, config)
 		case e := <-s.ErrChan:
-			if e != nil {
-				return "", e
-			}
+			go func() {
+				s.OptChan <- []string{fmt.Sprint(e.Error(), "\nAn error has occurred, change query or press Ctrl-C to terminate")}
+			}()
 		case <-interruptChan:
 			return "", terminal.InterruptErr
 		case r := <-runeChan:
-			close := r == terminal.KeyEndTransmission || s.OnChange(r, config)
-			closeReader <- close
-			if close {
+			if r == terminal.KeyEndTransmission || s.OnChange(r, config) {
 				break L
 			}
+			read <- true
 		}
 	}
 	options := s.filterOptions(config)
