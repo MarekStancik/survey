@@ -3,7 +3,7 @@ package survey
 import (
 	"strings"
 
-	"github.com/AlecAivazis/survey/v2/terminal"
+	"github.com/MarekStancik/survey/v2/terminal"
 )
 
 type Multiline struct {

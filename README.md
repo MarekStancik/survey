@@ -1,7 +1,7 @@
 # Survey
 
 [![Build Status](https://travis-ci.org/AlecAivazis/survey.svg?branch=feature%2Fpretty)](https://travis-ci.org/AlecAivazis/survey)
-[![GoDoc](http://img.shields.io/badge/godoc-reference-5272B4.svg)](https://pkg.go.dev/github.com/AlecAivazis/survey/v2)
+[![GoDoc](http://img.shields.io/badge/godoc-reference-5272B4.svg)](https://pkg.go.dev/github.com/MarekStancik/survey/v2)
 
 A library for building interactive prompts.
 
@@ -12,7 +12,7 @@ package main
 
 import (
     "fmt"
-    "github.com/AlecAivazis/survey/v2"
+    "github.com/MarekStancik/survey/v2"
 )
 
 // the questions to ask
@@ -85,7 +85,7 @@ Examples can be found in the `examples/` directory. Run them
 to see basic behavior:
 
 ```bash
-go get github.com/AlecAivazis/survey/v2
+go get github.com/MarekStancik/survey/v2
 
 cd $GOPATH/src/github.com/AlecAivazis/survey
 
@@ -368,7 +368,7 @@ looks for with `WithHelpInput`:
 
 ```golang
 import (
-    "github.com/AlecAivazis/survey/v2"
+    "github.com/MarekStancik/survey/v2"
 )
 
 number := ""
@@ -387,7 +387,7 @@ follows the patterns outlined [here](https://github.com/mgutz/ansi#style-format)
 
 ```golang
 import (
-    "github.com/AlecAivazis/survey/v2"
+    "github.com/MarekStancik/survey/v2"
 )
 
 number := ""
@@ -458,7 +458,7 @@ For some examples, you can see any of the tests in this repo.
 
 ### Why isn't sending a SIGINT (aka. CTRL-C) signal working?
 
-When you send an interrupt signal to the process, it only interrupts the current prompt instead of the entire process. This manifests in a `github.com/AlecAivazis/survey/v2/terminal.InterruptErr` being returned from `Ask` and `AskOne`. If you want to stop the process, handle the returned error in your code:
+When you send an interrupt signal to the process, it only interrupts the current prompt instead of the entire process. This manifests in a `github.com/MarekStancik/survey/v2/terminal.InterruptErr` being returned from `Ask` and `AskOne`. If you want to stop the process, handle the returned error in your code:
 
 ```go
 err := survey.AskOne(prompt, &myVar)

@@ -6,8 +6,8 @@ import (
 	"regexp"
 	"unicode/utf8"
 
-	"github.com/AlecAivazis/survey/v2/core"
-	"github.com/AlecAivazis/survey/v2/terminal"
+	"github.com/MarekStancik/survey/v2/core"
+	"github.com/MarekStancik/survey/v2/terminal"
 	goterm "golang.org/x/crypto/ssh/terminal"
 )
 
